@@ -1527,7 +1527,7 @@
     if (typeof type !== "string") {
       return false;
     }
-    return ["byte", "int", "char", "color", "float", "long", "double"].indexOf(type) !== -1;
+    return ["byte", "int", "char", "float", "long", "double"].indexOf(type) !== -1;
   }
 
   defaultScope.createJavaArray = function(type, bounds) {
@@ -7267,18 +7267,18 @@
         max = Math.max;
 
       function applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb) {
-        var a = min(((c1 & 0xff000000) >>> 24) + f, 0xff) << 24;
+        var a = min(((c1 & 0xff000000) >>> 24) + f, 0xff);
 
         var r = (ar + (((cr - ar) * f) >> 8));
-        r = ((r < 0) ? 0 : ((r > 255) ? 255 : r)) << 16;
+        r = ((r < 0) ? 0 : ((r > 255) ? 255 : r));
 
         var g = (ag + (((cg - ag) * f) >> 8));
-        g = ((g < 0) ? 0 : ((g > 255) ? 255 : g)) << 8;
+        g = ((g < 0) ? 0 : ((g > 255) ? 255 : g));
 
         var b = ab + (((cb - ab) * f) >> 8);
         b = (b < 0) ? 0 : ((b > 255) ? 255 : b);
 
-        return (a | r | g | b);
+        return color$4(r,g,b,a);
       }
 
       return {
@@ -7286,56 +7286,69 @@
           return c2;
         },
         blend: function(c1, c2) {
-          var f = (c2 & ALPHA_MASK) >>> 24,
-            ar = (c1 & RED_MASK),
-            ag = (c1 & GREEN_MASK),
-            ab = (c1 & BLUE_MASK),
-            br = (c2 & RED_MASK),
-            bg = (c2 & GREEN_MASK),
-            bb = (c2 & BLUE_MASK);
-
-          return (min(((c1 & ALPHA_MASK) >>> 24) + f, 0xff) << 24 |
-                  (ar + (((br - ar) * f) >> 8)) & RED_MASK |
-                  (ag + (((bg - ag) * f) >> 8)) & GREEN_MASK |
-                  (ab + (((bb - ab) * f) >> 8)) & BLUE_MASK);
+          var f = c2._a,
+            ar = c1._r,
+            ag = c1._g,
+            ab = c1._b,
+            br = c2._r,
+            bg = c2._g,
+            bb = c2._b;
+            
+          return color$4(ar + ((br - ar) * f >> 8),
+            	           ag + ((bg - ag) * f >> 8),
+           	               ab + ((bb - ab) * f >> 8),
+           	               min(c1._a  + f, 0xff));
         },
-        add: function(c1, c2) {
-          var f = (c2 & ALPHA_MASK) >>> 24;
-          return (min(((c1 & ALPHA_MASK) >>> 24) + f, 0xff) << 24 |
+        add: function(co1, co2) {
+          var f = co2._a,
+          c1 = co1.asInt,
+          c2 = co2.asInt;
+          
+          return color$1(min(co1._a + f, 0xff) << 24 |
                   min(((c1 & RED_MASK) + ((c2 & RED_MASK) >> 8) * f), RED_MASK) & RED_MASK |
                   min(((c1 & GREEN_MASK) + ((c2 & GREEN_MASK) >> 8) * f), GREEN_MASK) & GREEN_MASK |
                   min((c1 & BLUE_MASK) + (((c2 & BLUE_MASK) * f) >> 8), BLUE_MASK));
         },
-        subtract: function(c1, c2) {
-          var f = (c2 & ALPHA_MASK) >>> 24;
-          return (min(((c1 & ALPHA_MASK) >>> 24) + f, 0xff) << 24 |
-                  max(((c1 & RED_MASK) - ((c2 & RED_MASK) >> 8) * f), GREEN_MASK) & RED_MASK |
-                  max(((c1 & GREEN_MASK) - ((c2 & GREEN_MASK) >> 8) * f), BLUE_MASK) & GREEN_MASK |
-                  max((c1 & BLUE_MASK) - (((c2 & BLUE_MASK) * f) >> 8), 0));
+        subtract: function(co1, co2) {
+          var f = co2._a,
+          c1 = co1.asInt,
+          c2 = co2.asInt;
+          
+          return color$1(min(co1._a + f, 0xff) << 24 | 
+                         max(((c1 & RED_MASK) - ((c2 & RED_MASK) >> 8) * f), GREEN_MASK) & RED_MASK | 
+                         max(((c1 & GREEN_MASK) - ((c2 & GREEN_MASK) >> 8) * f), BLUE_MASK) & GREEN_MASK | 
+                         max((c1 & BLUE_MASK) - (((c2 & BLUE_MASK) * f) >> 8), 0));
         },
-        lightest: function(c1, c2) {
-          var f = (c2 & ALPHA_MASK) >>> 24;
-          return (min(((c1 & ALPHA_MASK) >>> 24) + f, 0xff) << 24 |
-                  max(c1 & RED_MASK, ((c2 & RED_MASK) >> 8) * f) & RED_MASK |
-                  max(c1 & GREEN_MASK, ((c2 & GREEN_MASK) >> 8) * f) & GREEN_MASK |
-                  max(c1 & BLUE_MASK, ((c2 & BLUE_MASK) * f) >> 8));
+        lightest: function(co1, co2) {
+          var f = co2._a,
+          c1 = co1.asInt,
+          c2 = co2.asInt;
+          
+          return color$1(min(co1._a + f, 0xff) << 24 | 
+                         max(c1 & RED_MASK, ((c2 & RED_MASK) >> 8) * f) & RED_MASK | 
+                         max(c1 & GREEN_MASK, ((c2 & GREEN_MASK) >> 8) * f) & GREEN_MASK | 
+                         max(c1 & BLUE_MASK, (c2 & BLUE_MASK) * f >> 8));
         },
-        darkest: function(c1, c2) {
-          var f = (c2 & ALPHA_MASK) >>> 24,
+        darkest: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt, 
             ar = (c1 & RED_MASK),
             ag = (c1 & GREEN_MASK),
             ab = (c1 & BLUE_MASK),
             br = min(c1 & RED_MASK, ((c2 & RED_MASK) >> 8) * f),
             bg = min(c1 & GREEN_MASK, ((c2 & GREEN_MASK) >> 8) * f),
             bb = min(c1 & BLUE_MASK, ((c2 & BLUE_MASK) * f) >> 8);
-
-          return (min(((c1 & ALPHA_MASK) >>> 24) + f, 0xff) << 24 |
-                  (ar + (((br - ar) * f) >> 8)) & RED_MASK |
-                  (ag + (((bg - ag) * f) >> 8)) & GREEN_MASK |
-                  (ab + (((bb - ab) * f) >> 8)) & BLUE_MASK);
+          
+          return color$1(min(co1._a + f, 0xff) << 24 | 
+                         (ar + (((br - ar) * f) >> 8)) & RED_MASK | 
+                         (ag + (((bg - ag) * f) >> 8)) & GREEN_MASK | 
+                         (ab + (((bb - ab) * f) >> 8)) & BLUE_MASK );
         },
-        difference: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        difference: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
@@ -7345,11 +7358,13 @@
             cr = (ar > br) ? (ar - br) : (br - ar),
             cg = (ag > bg) ? (ag - bg) : (bg - ag),
             cb = (ab > bb) ? (ab - bb) : (bb - ab);
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        exclusion: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        exclusion: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
@@ -7359,11 +7374,13 @@
             cr = ar + br - ((ar * br) >> 7),
             cg = ag + bg - ((ag * bg) >> 7),
             cb = ab + bb - ((ab * bb) >> 7);
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        multiply: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        multiply: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
@@ -7373,11 +7390,13 @@
             cr = (ar * br) >> 8,
             cg = (ag * bg) >> 8,
             cb = (ab * bb) >> 8;
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        screen: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        screen: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
@@ -7387,11 +7406,13 @@
             cr = 255 - (((255 - ar) * (255 - br)) >> 8),
             cg = 255 - (((255 - ag) * (255 - bg)) >> 8),
             cb = 255 - (((255 - ab) * (255 - bb)) >> 8);
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        hard_light: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        hard_light: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
@@ -7401,11 +7422,13 @@
             cr = (br < 128) ? ((ar * br) >> 7) : (255 - (((255 - ar) * (255 - br)) >> 7)),
             cg = (bg < 128) ? ((ag * bg) >> 7) : (255 - (((255 - ag) * (255 - bg)) >> 7)),
             cb = (bb < 128) ? ((ab * bb) >> 7) : (255 - (((255 - ab) * (255 - bb)) >> 7));
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        soft_light: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        soft_light: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
@@ -7415,11 +7438,13 @@
             cr = ((ar * br) >> 7) + ((ar * ar) >> 8) - ((ar * ar * br) >> 15),
             cg = ((ag * bg) >> 7) + ((ag * ag) >> 8) - ((ag * ag * bg) >> 15),
             cb = ((ab * bb) >> 7) + ((ab * ab) >> 8) - ((ab * ab * bb) >> 15);
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        overlay: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        overlay: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
@@ -7429,65 +7454,69 @@
             cr = (ar < 128) ? ((ar * br) >> 7) : (255 - (((255 - ar) * (255 - br)) >> 7)),
             cg = (ag < 128) ? ((ag * bg) >> 7) : (255 - (((255 - ag) * (255 - bg)) >> 7)),
             cb = (ab < 128) ? ((ab * bb) >> 7) : (255 - (((255 - ab) * (255 - bb)) >> 7));
-
-          return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
+            
+            return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        dodge: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        dodge: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
             br = (c2 & RED_MASK) >> 16,
             bg = (c2 & GREEN_MASK) >> 8,
             bb = (c2 & BLUE_MASK);
-
+            
           var cr = 255;
           if (br !== 255) {
             cr = (ar << 8) / (255 - br);
             cr = (cr < 0) ? 0 : ((cr > 255) ? 255 : cr);
           }
-
+          
           var cg = 255;
           if (bg !== 255) {
             cg = (ag << 8) / (255 - bg);
             cg = (cg < 0) ? 0 : ((cg > 255) ? 255 : cg);
           }
-
+          
           var cb = 255;
           if (bb !== 255) {
             cb = (ab << 8) / (255 - bb);
             cb = (cb < 0) ? 0 : ((cb > 255) ? 255 : cb);
           }
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         },
-        burn: function(c1, c2) {
-          var f  = (c2 & ALPHA_MASK) >>> 24,
+        burn: function(co1, co2) {
+          var f = co2._a,
+            c1 = co1.asInt,
+            c2 = co2.asInt,
             ar = (c1 & RED_MASK) >> 16,
             ag = (c1 & GREEN_MASK) >> 8,
             ab = (c1 & BLUE_MASK),
             br = (c2 & RED_MASK) >> 16,
             bg = (c2 & GREEN_MASK) >> 8,
             bb = (c2 & BLUE_MASK);
-
+          
           var cr = 0;
           if (br !== 0) {
             cr = ((255 - ar) << 8) / br;
             cr = 255 - ((cr < 0) ? 0 : ((cr > 255) ? 255 : cr));
           }
-
+          
           var cg = 0;
           if (bg !== 0) {
             cg = ((255 - ag) << 8) / bg;
             cg = 255 - ((cg < 0) ? 0 : ((cg > 255) ? 255 : cg));
           }
-
+          
           var cb = 0;
           if (bb !== 0) {
             cb = ((255 - ab) << 8) / bb;
             cb = 255 - ((cb < 0) ? 0 : ((cb > 255) ? 255 : cb));
           }
-
+          
           return applyMode(c1, f, ar, ag, ab, br, bg, bb, cr, cg, cb);
         }
       };
@@ -7495,7 +7524,7 @@
 
     function color$4(aValue1, aValue2, aValue3, aValue4) {
       var r, g, b, a;
-
+      
       if (curColorMode === PConstants.HSB) {
         var rgb = p.color.toRGB(aValue1, aValue2, aValue3);
         r = rgb[0];
@@ -7506,9 +7535,9 @@
         g = Math.round(255 * (aValue2 / colorModeY));
         b = Math.round(255 * (aValue3 / colorModeZ));
       }
-
+      
       a = Math.round(255 * (aValue4 / colorModeA));
-
+      
       // Limit values less than 0 and greater than 255
       r = (r < 0) ? 0 : r;
       g = (g < 0) ? 0 : g;
@@ -7518,29 +7547,44 @@
       g = (g > 255) ? 255 : g;
       b = (b > 255) ? 255 : b;
       a = (a > 255) ? 255 : a;
-
-      // Create color int
-      return (a << 24) & PConstants.ALPHA_MASK | (r << 16) & PConstants.RED_MASK | (g << 8) & PConstants.GREEN_MASK | b & PConstants.BLUE_MASK;
+      
+      var intc = p.color.toInt(r, g, b, a);
+      
+      return { _r:r,
+               _g:g,
+               _b:b,
+               _a:a,
+               asInt:p.color.toInt(r, g, b, a),
+               asString:p.color.toString(intc) };
     }
-
+    
     function color$2(aValue1, aValue2) {
       var a;
-
+      
       // Color int and alpha
       if (aValue1 & PConstants.ALPHA_MASK) {
         a = Math.round(255 * (aValue2 / colorModeA));
         // Limit values less than 0 and greater than 255
         a = (a > 255) ? 255 : a;
         a = (a < 0) ? 0 : a;
-
-        return aValue1 - (aValue1 & PConstants.ALPHA_MASK) + ((a << 24) & PConstants.ALPHA_MASK);
+        
+        var aColor =  aValue1 - (aValue1 & PConstants.ALPHA_MASK) + (a << 24 & PConstants.ALPHA_MASK);
+        
+        return {
+        	_r: ((aColor >> 16) & 255) / 255 * colorModeX,
+        	_g: ((aColor & GREEN_MASK) >>> 8) / 255 * colorModeY,
+        	_b: (aColor & RED_MASK) / 255 * colorModeZ,
+        	_a: ((aColor >> 24) & 255) / 255 * colorModeA,
+            asInt:aColor,
+            asString:p.color.toString(aColor)
+        }
       }
       // Grayscale and alpha
       if (curColorMode === PConstants.RGB) {
-        return color$4(aValue1, aValue1, aValue1, aValue2);
+           return color$4(aValue1, aValue1, aValue1, aValue2);
       }
       if (curColorMode === PConstants.HSB) {
-        return color$4(0, 0, (aValue1 / colorModeX) * colorModeZ, aValue2);
+           return color$4(0, 0, (aValue1 / colorModeX) * colorModeZ, aValue2);
       }
     }
 
@@ -7560,10 +7604,17 @@
           // Java Overflow
           aValue1 -= 4294967296;
         }
-        return aValue1;
+        return {
+        	_r: ((aValue1 >> 16) & 255) / 255 * colorModeX,
+        	_g: ((aValue1 & GREEN_MASK) >>> 8) / 255 * colorModeY,
+        	_b: (aValue1 & BLUE_MASK) / 255 * colorModeZ,
+        	_a: ((aValue1 >> 24) & 255) / 255 * colorModeA,
+            asString: p.color.toString(aValue1),
+            asInt: aValue1
+        }
       }
     }
-
+    
     /**
     * Creates colors for storing in variables of the color datatype. The parameters are
     * interpreted as RGB or HSB values depending on the current colorMode(). The default
@@ -7580,7 +7631,7 @@
     * @returns {color} the color
     *
     * @see colorMode
-    */
+    */    
     p.color = function(aValue1, aValue2, aValue3, aValue4) {
 
       // 4 arguments: (R, G, B, A) or (H, S, B, A)
@@ -7619,13 +7670,15 @@
     };
 
     // Creates a simple array in [R, G, B, A] format, [255, 255, 255, 255]
-    p.color.toArray = function(colorInt) {
+    p.color.toArray = function(colorObj) {
+      var colorInt = colorObj.asInt; 
       return [(colorInt & PConstants.RED_MASK) >>> 16, (colorInt & PConstants.GREEN_MASK) >>> 8,
               colorInt & PConstants.BLUE_MASK, (colorInt & PConstants.ALPHA_MASK) >>> 24];
     };
 
     // Creates a WebGL color array in [R, G, B, A] format. WebGL wants the color ranges between 0 and 1, [1, 1, 1, 1]
-    p.color.toGLArray = function(colorInt) {
+    p.color.toGLArray = function(colorObj) {
+      var colorInt = colorObj.asInt;
       return [((colorInt & PConstants.RED_MASK) >>> 16) / 255, ((colorInt & PConstants.GREEN_MASK) >>> 8) / 255,
               (colorInt & PConstants.BLUE_MASK) / 255, ((colorInt & PConstants.ALPHA_MASK) >>> 24) / 255];
     };
@@ -7670,9 +7723,9 @@
     function colorToHSB(colorInt) {
       var red, green, blue;
 
-      red   = ((colorInt & PConstants.RED_MASK) >>> 16) / 255;
-      green = ((colorInt & PConstants.GREEN_MASK) >>> 8) / 255;
-      blue  = (colorInt & PConstants.BLUE_MASK) / 255;
+      red   = (colorInt.r & 255) / 255;
+      green = (colorInt.g & 255) / 255;
+      blue  = (colorInt.b & 255) / 255;
 
       var max = p.max(p.max(red,green), blue),
           min = p.min(p.min(red,green), blue),
@@ -7769,7 +7822,7 @@
     * @see brightness
     */
     p.red = function(aColor) {
-      return ((aColor & PConstants.RED_MASK) >>> 16) / 255 * colorModeX;
+      return aColor._r / 255 * colorModeX;
     };
 
     /**
@@ -7789,7 +7842,7 @@
     * @see brightness
     */
     p.green = function(aColor) {
-      return ((aColor & PConstants.GREEN_MASK) >>> 8) / 255 * colorModeY;
+      return aColor._g / 255 * colorModeY;
     };
 
     /**
@@ -7809,7 +7862,7 @@
     * @see brightness
     */
     p.blue = function(aColor) {
-      return (aColor & PConstants.BLUE_MASK) / 255 * colorModeZ;
+      return aColor._b / 255 * colorModeZ;
     };
 
     /**
@@ -7829,7 +7882,7 @@
     * @see brightness
     */
     p.alpha = function(aColor) {
-      return ((aColor & PConstants.ALPHA_MASK) >>> 24) / 255 * colorModeA;
+      return aColor._a * colorModeA;
     };
 
     /**
@@ -7856,9 +7909,9 @@
         // Special processing for HSB mode.
         // Get HSB and Alpha values for Color 1 and 2
         hsb1 = colorToHSB(colorBits1);
-        a1 = ((colorBits1 & PConstants.ALPHA_MASK) >>> 24) / colorModeA;
+        a1 = c1._a / colorModeA;
         hsb2 = colorToHSB(colorBits2);
-        a2 = ((colorBits2 & PConstants.ALPHA_MASK) >>> 24) / colorModeA;
+        a2 = c2._a / colorModeA;
 
         // Return lerp value for each channel, for HSB components
         h = p.lerp(hsb1[0], hsb2[0], amt);
@@ -7868,34 +7921,17 @@
         // ... and for Alpha-range
         a = p.lerp(a1, a2, amt) * colorModeA;
 
-        return (a << 24) & PConstants.ALPHA_MASK |
-               (rgb[0] << 16) & PConstants.RED_MASK |
-               (rgb[1] << 8) & PConstants.GREEN_MASK |
-               rgb[2] & PConstants.BLUE_MASK;
+        return p.color(rgb[0], rgb[1], rgb[2], a);
       }
 
-      // Get RGBA values for Color 1 to floats
-      r1 = (colorBits1 & PConstants.RED_MASK) >>> 16;
-      g1 = (colorBits1 & PConstants.GREEN_MASK) >>> 8;
-      b1 = (colorBits1 & PConstants.BLUE_MASK);
-      a1 = ((colorBits1 & PConstants.ALPHA_MASK) >>> 24) / colorModeA;
-
-      // Get RGBA values for Color 2 to floats
-      r2 = (colorBits2 & PConstants.RED_MASK) >>> 16;
-      g2 = (colorBits2 & PConstants.GREEN_MASK) >>> 8;
-      b2 = (colorBits2 & PConstants.BLUE_MASK);
-      a2 = ((colorBits2 & PConstants.ALPHA_MASK) >>> 24) / colorModeA;
 
       // Return lerp value for each channel, INT for color, Float for Alpha-range
-      r = p.lerp(r1, r2, amt) | 0;
-      g = p.lerp(g1, g2, amt) | 0;
-      b = p.lerp(b1, b2, amt) | 0;
-      a = p.lerp(a1, a2, amt) * colorModeA;
+      r = p.lerp(c1._r, c2._r, amt) | 0;
+      g = p.lerp(c1._g, c2._r, amt) | 0;
+      b = p.lerp(c1._b, c2._b, amt) | 0;
+      a = p.lerp(c1._a / colourModeA, c2._a / colourModeA, amt) * colorModeA;
 
-      return (a << 24) & PConstants.ALPHA_MASK |
-             (r << 16) & PConstants.RED_MASK |
-             (g << 8) & PConstants.GREEN_MASK |
-             b & PConstants.BLUE_MASK;
+      return p.color(r,g,b,a);
     };
 
     /**
@@ -12157,7 +12193,7 @@
     function executeContextFill() {
       if(doFill) {
         if(isFillDirty) {
-          curContext.fillStyle = p.color.toString(currentFillColor);
+          curContext.fillStyle = currentFillColor.asString;
           isFillDirty = false;
         }
         curContext.fill();
@@ -12206,10 +12242,19 @@
      * @see #colorMode()
      */
     DrawingShared.prototype.stroke = function() {
-      var color = p.color(arguments[0], arguments[1], arguments[2], arguments[3]);
+      var color;
+      
+      // check is args color object or rgba values
+      if (typeof arguments[0] == "object") {
+        color = arguments[0];
+      } else {     
+        color = p.color(arguments[0], arguments[1], arguments[2], arguments[3]);
+      }       
+      
       if(color === currentStrokeColor && doStroke) {
         return;
       }
+      
       doStroke = true;
       currentStrokeColor = color;
     };
@@ -12368,7 +12413,7 @@
 
       x = Math.round(x);
       y = Math.round(y);
-      curContext.fillStyle = p.color.toString(currentStrokeColor);
+      curContext.fillStyle = currentStrokeColor.asString;
       isFillDirty = true;
       // Draw a circle for any point larger than 1px
       if (lineWidth > 1) {
@@ -15438,7 +15483,7 @@
       var color, oldFill;
       if (arguments.length === 3) {
         // called p.set(), was it with a color or a img ?
-        if (typeof obj === "number") {
+        if (!(obj instanceof PImage)) {
           set$3(x, y, obj);
         } else if (obj instanceof PImage || obj.__isPImage) {
           p.image(obj, x, y);
@@ -15481,10 +15526,10 @@
       },
       setPixel: function(i,c) {
         var offset = i*4, data = p.imageData.data;
-        data[offset+0] = (c & 0x00ff0000) >>> 16; // RED_MASK
-        data[offset+1] = (c & 0x0000ff00) >>> 8;  // GREEN_MASK
-        data[offset+2] = (c & 0x000000ff);        // BLUE_MASK
-        data[offset+3] = (c & 0xff000000) >>> 24; // ALPHA_MASK
+        data[offset+0] = c._r; // RED_MASK
+        data[offset+1] = c._g; // GREEN_MASK
+        data[offset+2] = c._b; // BLUE_MASK
+        data[offset+3] = c._a; // ALPHA_MASK
       },
       toArray: function() {
         var arr = [], length = p.imageData.width * p.imageData.height, data = p.imageData.data;
@@ -15663,7 +15708,7 @@
         if (p.alpha(backgroundObj) !== colorModeA) {
           curContext.clearRect(0,0, p.width, p.height);
         }
-        curContext.fillStyle = p.color.toString(backgroundObj);
+        curContext.fillStyle = backgroundObj.asString;
         curContext.fillRect(0, 0, p.width, p.height);
         isFillDirty = true;
         restoreContext();
@@ -16887,7 +16932,7 @@
       if (!curTextFont.glyph) {
         if (str && ("fillText" in curContext)) {
           if (isFillDirty) {
-            curContext.fillStyle = p.color.toString(currentFillColor);
+            curContext.fillStyle = currentFillColor.asString;
             isFillDirty = false;
           }
 
