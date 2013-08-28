@@ -7572,8 +7572,8 @@
         
         return {
         	_r: ((aColor >> 16) & 255) / 255 * colorModeX,
-        	_g: ((aColor & GREEN_MASK) >>> 8) / 255 * colorModeY,
-        	_b: (aColor & RED_MASK) / 255 * colorModeZ,
+        	_g: ((aColor & PConstants.GREEN_MASK) >>> 8) / 255 * colorModeY,
+        	_b: (aColor & PConstants.RED_MASK) / 255 * colorModeZ,
         	_a: ((aColor >> 24) & 255) / 255 * colorModeA,
             asInt:aColor,
             asString:p.color.toString(aColor)
@@ -7606,8 +7606,8 @@
         }
         return {
         	_r: ((aValue1 >> 16) & 255) / 255 * colorModeX,
-        	_g: ((aValue1 & GREEN_MASK) >>> 8) / 255 * colorModeY,
-        	_b: (aValue1 & BLUE_MASK) / 255 * colorModeZ,
+        	_g: ((aValue1 & PConstants.GREEN_MASK) >>> 8) / 255 * colorModeY,
+        	_b: (aValue1 & PConstants.BLUE_MASK) / 255 * colorModeZ,
         	_a: ((aValue1 >> 24) & 255) / 255 * colorModeA,
             asString: p.color.toString(aValue1),
             asInt: aValue1
