@@ -7723,9 +7723,9 @@
     function colorToHSB(colorInt) {
       var red, green, blue;
 
-      red   = (colorInt.r & 255) / 255;
-      green = (colorInt.g & 255) / 255;
-      blue  = (colorInt.b & 255) / 255;
+      red   = (colorInt._r & 255) / 255;
+      green = (colorInt._g & 255) / 255;
+      blue  = (colorInt._b & 255) / 255;
 
       var max = p.max(p.max(red,green), blue),
           min = p.min(p.min(red,green), blue),
@@ -7902,15 +7902,13 @@
     p.lerpColor = function(c1, c2, amt) {
       var r, g, b, a, r1, g1, b1, a1, r2, g2, b2, a2;
       var hsb1, hsb2, rgb, h, s;
-      var colorBits1 = p.color(c1);
-      var colorBits2 = p.color(c2);
 
       if (curColorMode === PConstants.HSB) {
         // Special processing for HSB mode.
         // Get HSB and Alpha values for Color 1 and 2
-        hsb1 = colorToHSB(colorBits1);
+        hsb1 = colorToHSB(c1);
         a1 = c1._a / colorModeA;
-        hsb2 = colorToHSB(colorBits2);
+        hsb2 = colorToHSB(c2);
         a2 = c2._a / colorModeA;
 
         // Return lerp value for each channel, for HSB components
