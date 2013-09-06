@@ -7927,7 +7927,7 @@
       r = p.lerp(c1._r, c2._r, amt) | 0;
       g = p.lerp(c1._g, c2._r, amt) | 0;
       b = p.lerp(c1._b, c2._b, amt) | 0;
-      a = p.lerp(c1._a / colourModeA, c2._a / colourModeA, amt) * colorModeA;
+      a = p.lerp(c1._a / colorModeA, c2._a / colorModeA, amt) * colorModeA;
 
       return p.color(r,g,b,a);
     };
