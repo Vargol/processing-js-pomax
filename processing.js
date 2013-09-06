@@ -7652,7 +7652,11 @@
       // 1 argument: (Grayscale) or (Color)
       if (typeof aValue1 === "number") {
         return color$1(aValue1);
-      }
+      } 
+      
+      if (typeof aValue1 !== undef) {
+        return aValue1;
+      } 
 
       // Default
       return color$4(colorModeX, colorModeY, colorModeZ, colorModeA);
