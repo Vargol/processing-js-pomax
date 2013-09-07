@@ -12274,7 +12274,7 @@
     function executeContextStroke() {
       if(doStroke) {
         if(isStrokeDirty) {
-          curContext.strokeStyle = p.color.toString(currentStrokeColor);
+          curContext.strokeStyle = currentStrokeColor.asString;
           isStrokeDirty = false;
         }
         curContext.stroke();
