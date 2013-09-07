@@ -7654,7 +7654,7 @@
         return color$1(aValue1);
       } 
       
-      if (typeof aValue1 !== undef) {
+      if (typeof aValue1 === "object") {
         return aValue1;
       } 
 
@@ -8013,7 +8013,7 @@
         return p.modes.burn(c1, c2);
       }
     };
-
+    
     ////////////////////////////////////////////////////////////////////////////
     // Canvas-Matrix manipulation
     ////////////////////////////////////////////////////////////////////////////
@@ -12253,7 +12253,7 @@
         color = p.color(arguments[0], arguments[1], arguments[2], arguments[3]);
       }       
       
-      if(color === currentStrokeColor && doStroke) {
+      if(color.asInt == currentStrokeColor.asInt && doStroke) {
         return;
       }
       
