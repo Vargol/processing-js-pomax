@@ -7886,7 +7886,7 @@
     * @see brightness
     */
     p.alpha = function(aColor) {
-      return aColor._a * colorModeA;
+      return aColor._a / 255 * colorModeA;
     };
 
     /**
