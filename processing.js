@@ -2229,11 +2229,11 @@
         drawing, // hold a Drawing2D or Drawing3D object
         doFill = true,
         fillStyle = [1.0, 1.0, 1.0, 1.0],
-        currentFillColor = 0xFFFFFFFF,
+        currentFillColor = {_r:255, _b:255, _g:255, _a:255, asInt:-1, asString:"rgba(255,255,255,1.0)"}, // 0xFFFFFFFF
         isFillDirty = true,
         doStroke = true,
         strokeStyle = [0.0, 0.0, 0.0, 1.0],
-        currentStrokeColor = 0xFF000000,
+        currentStrokeColor = {_r:0, _b:0, _g:0, _a:255, asInt:-16777216, asString:"rgba(0,0,0,1.0)"}, // 0xFF000000
         isStrokeDirty = true,
         lineWidth = 1,
         loopStarted = false,
@@ -2256,7 +2256,7 @@
         curTightness = 0,
         curveDet = 20,
         curveInited = false,
-        backgroundObj = -3355444, // rgb(204, 204, 204) is the default gray background colour
+        backgroundObj = {_r:204, _b:204, _g:204, _a:255, asInt:-3355444, asString:"rgba(204,204,204,1.0)"}, // rgb(204, 204, 204) is the default gray background colour
         bezDetail = 20,
         colorModeA = 255,
         colorModeX = 255,
@@ -7554,7 +7554,7 @@
                _g:g,
                _b:b,
                _a:a,
-               asInt:p.color.toInt(r, g, b, a),
+               asInt:intc,
                asString:p.color.toString(intc) };
     }
     
