@@ -7906,6 +7906,7 @@
     p.lerpColor = function(c1, c2, amt) {
       var r, g, b, a, r1, g1, b1, a1, r2, g2, b2, a2;
       var hsb1, hsb2, rgb, h, s;
+      var intc;
 
       if (curColorMode === PConstants.HSB) {
         // Special processing for HSB mode.
@@ -7923,9 +7924,16 @@
         // ... and for Alpha-range
         a = p.lerp(a1, a2, amt) * colorModeA;
 
-        return p.color(rgb[0], rgb[1], rgb[2], a);
+        intc = p.color.toInt(rgb[0], rgb[1], rgb[2], a);
+      
+        return { _r:rgb[0],
+                 _g:rgb[1],
+                 _b:rgb[2],
+                 _a:a,
+                 asInt:intc,
+                 asString:p.color.toString(intc) };
       }
-
+      
 
       // Return lerp value for each channel, INT for color, Float for Alpha-range
       r = p.lerp(c1._r, c2._r, amt) | 0;
@@ -7933,7 +7941,14 @@
       b = p.lerp(c1._b, c2._b, amt) | 0;
       a = p.lerp(c1._a / colorModeA, c2._a / colorModeA, amt) * colorModeA;
 
-      return p.color(r,g,b,a);
+      intc = p.color.toInt(r, g, b, a);
+      
+      return { _r:r,
+               _g:g,
+               _b:b,
+               _a:a,
+               asInt:intc,
+               asString:p.color.toString(intc) };
     };
 
     /**
