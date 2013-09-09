@@ -7937,7 +7937,7 @@
 
       // Return lerp value for each channel, INT for color, Float for Alpha-range
       r = p.lerp(c1._r, c2._r, amt) | 0;
-      g = p.lerp(c1._g, c2._r, amt) | 0;
+      g = p.lerp(c1._g, c2._g, amt) | 0;
       b = p.lerp(c1._b, c2._b, amt) | 0;
       a = p.lerp(c1._a / colorModeA, c2._a / colorModeA, amt) * colorModeA;
 
