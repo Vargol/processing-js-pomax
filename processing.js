@@ -15281,18 +15281,18 @@
       if (isContextReplaced) {
         var offset = ((0|x) + p.width * (0|y)) * 4;
         data = p.imageData.data;
-        return (data[offset + 3] << 24) & PConstants.ALPHA_MASK |
-               (data[offset] << 16) & PConstants.RED_MASK |
-               (data[offset + 1] << 8) & PConstants.GREEN_MASK |
-               data[offset + 2] & PConstants.BLUE_MASK;
+        return color$4(data[offset],
+                       data[offset + 1],
+                       data[offset + 2],
+                       data[offset + 3]); 
       }
 
       // x,y is inside canvas space
       data = p.toImageData(0|x, 0|y, 1, 1).data;
-      return (data[3] << 24) & PConstants.ALPHA_MASK |
-             (data[0] << 16) & PConstants.RED_MASK |
-             (data[1] << 8) & PConstants.GREEN_MASK |
-             data[2] & PConstants.BLUE_MASK;
+      return color$4(data[0],
+                     data[1],
+                     data[2],
+                     data[3]);
     }
     function get$3(x,y,img) {
       if (img.isRemote) { // Remote images cannot access imageData
@@ -15301,10 +15301,10 @@
       // PImage.get(x,y) was called, return the color (int) at x,y of img
       var offset = y * img.width * 4 + (x * 4),
           data = img.imageData.data;
-      return (data[offset + 3] << 24) & PConstants.ALPHA_MASK |
-             (data[offset] << 16) & PConstants.RED_MASK |
-             (data[offset + 1] << 8) & PConstants.GREEN_MASK |
-             data[offset + 2] & PConstants.BLUE_MASK;
+          return color$4(data[offset],
+                         data[offset + 1],
+                         data[offset + 2],
+                         data[offset + 3]);
     }
     function get$4(x, y, w, h) {
       // return a PImage of w and h from cood x,y of curContext
