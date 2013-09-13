@@ -7646,6 +7646,9 @@
 
       // 2 arguments: (Color, A) or (Grayscale, A)
       if (aValue1 !== undef && aValue2 !== undef) {
+        if (typeof aValue1 === "object") {
+          return color$2(aValue1.asInt, aValue2);
+        }
         return color$2(aValue1, aValue2);
       }
 
@@ -7655,7 +7658,7 @@
       } 
       
       if (typeof aValue1 === "object") {
-        return aValue1;
+        return color$1(aValue1.asInt);
       } 
 
       // Default
@@ -16532,10 +16535,10 @@
         for (x = 0; x < destW; x++) {
           idx = (destOffset + x) * 4;
 
-          destColor = (destPixels[idx + 3] << 24) &
+          destColor = color$1((destPixels[idx + 3] << 24) &
                       ALPHA_MASK | (destPixels[idx] << 16) &
                       RED_MASK   | (destPixels[idx + 1] << 8) &
-                      GREEN_MASK |  destPixels[idx + 2] & BLUE_MASK;
+                      GREEN_MASK |  destPixels[idx + 2] & BLUE_MASK);
 
           pshared.fracU = pshared.sX & PREC_MAXVAL;
           pshared.ifU = PREC_MAXVAL - pshared.fracU;
@@ -16588,12 +16591,12 @@
                        pshared.ur * ((pshared.cUR & ALPHA_MASK) >>> 24) +
                        pshared.lr * ((pshared.cLR & ALPHA_MASK) >>> 24)) << PREC_ALPHA_SHIFT) & ALPHA_MASK;
 
-          blendedColor = blendFunc(destColor, (pshared.a | pshared.r | pshared.g | pshared.b));
+          blendedColor = blendFunc(destColor, color$1(pshared.a | pshared.r | pshared.g | pshared.b));
 
-          destPixels[idx]     = (blendedColor & RED_MASK) >>> 16;
-          destPixels[idx + 1] = (blendedColor & GREEN_MASK) >>> 8;
-          destPixels[idx + 2] = (blendedColor & BLUE_MASK);
-          destPixels[idx + 3] = (blendedColor & ALPHA_MASK) >>> 24;
+          destPixels[idx]     = blendedColor._r & 255;
+          destPixels[idx + 1] = blendedColor._g & 255;
+          destPixels[idx + 2] = blendedColor._b & 255;
+          destPixels[idx + 3] = blendedColor._a & 255;
 
           pshared.sX += dx;
         }
