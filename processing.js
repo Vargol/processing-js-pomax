@@ -10927,9 +10927,9 @@
       // Instead of calling p.color, we do the calculations ourselves to
       // reduce property lookups.
       var col = color$4(r, g, b, 0);
-      var normalizedCol = [ ((col & PConstants.RED_MASK) >>> 16) / 255,
-                            ((col & PConstants.GREEN_MASK) >>> 8) / 255,
-                             (col & PConstants.BLUE_MASK) / 255 ];
+      var normalizedCol = [ col._r / 255,
+                            col._g / 255,
+                            col._b / 255 ];
 
       curContext.useProgram(programObject3D);
       uniformf("uLights.color.3d." + lightCount, programObject3D, "uLights" + lightCount + ".color", normalizedCol);
@@ -10992,9 +10992,9 @@
       // Instead of calling p.color, we do the calculations ourselves to
       // reduce property lookups.
       var col = color$4(r, g, b, 0);
-      var normalizedCol = [ ((col & PConstants.RED_MASK) >>> 16) / 255,
-                            ((col & PConstants.GREEN_MASK) >>> 8) / 255,
-                             (col & PConstants.BLUE_MASK) / 255 ];
+      var normalizedCol = [ col._r / 255,
+                            col._g / 255,
+                            col._b / 255 ];
 
       uniformf("uLights.color.3d." + lightCount, programObject3D, "uLights" + lightCount + ".color", normalizedCol);
       uniformf("uLights.position.3d." + lightCount, programObject3D, "uLights" + lightCount + ".position", dir);
@@ -11062,9 +11062,9 @@
       // Instead of calling p.color, we do the calculations ourselves to
       // reduce property lookups.
       var col = color$4(r, g, b, 0);
-      var normalizedCol = [ ((col & PConstants.RED_MASK) >>> 16) / 255,
-                            ((col & PConstants.GREEN_MASK) >>> 8) / 255,
-                             (col & PConstants.BLUE_MASK) / 255 ];
+      var normalizedCol = [ col._r / 255,
+                            col._g / 255,
+                            col._b / 255 ];
 
       curContext.useProgram(programObject3D);
       uniformf("uSpecular3d", programObject3D, "uSpecular", normalizedCol);
@@ -11135,9 +11135,9 @@
       // Instead of calling p.color, we do the calculations ourselves to
       // reduce property lookups.
       var col = color$4(r, g, b, 0);
-      var normalizedCol = [ ((col & PConstants.RED_MASK) >>> 16) / 255,
-                            ((col & PConstants.GREEN_MASK) >>> 8) / 255,
-                             (col & PConstants.BLUE_MASK) / 255 ];
+      var normalizedCol = [ col._r / 255,
+                            col._g / 255,
+                            col._b / 255 ];
 
       curContext.useProgram(programObject3D);
       uniformf("uLights.color.3d." + lightCount, programObject3D, "uLights" + lightCount + ".color", normalizedCol);
@@ -11225,9 +11225,9 @@
       // Instead of calling p.color, we do the calculations ourselves to
       // reduce property lookups.
       var col = color$4(r, g, b, 0);
-      var normalizedCol = [ ((col & PConstants.RED_MASK) >>> 16) / 255,
-                            ((col & PConstants.GREEN_MASK) >>> 8) / 255,
-                             (col & PConstants.BLUE_MASK) / 255 ];
+      var normalizedCol = [ col._r / 255,
+                            col._g / 255,
+                            col._b / 255 ];
 
       uniformf("uLights.color.3d." + lightCount, programObject3D, "uLights" + lightCount + ".color", normalizedCol);
       uniformf("uLights.position.3d." + lightCount, programObject3D, "uLights" + lightCount + ".position", pos.array());
