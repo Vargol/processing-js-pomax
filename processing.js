@@ -15274,6 +15274,8 @@
 
     function get$2(x,y) {
       var data;
+      var intc;
+      
       // return the color at x,y (int) of curContext
       if (x >= p.width || x < 0 || y < 0 || y >= p.height) {
         // x,y is outside image return transparent black
@@ -15284,18 +15286,27 @@
       if (isContextReplaced) {
         var offset = ((0|x) + p.width * (0|y)) * 4;
         data = p.imageData.data;
-        return color$4(data[offset],
-                       data[offset + 1],
-                       data[offset + 2],
-                       data[offset + 3]); 
+        intc = p.color.toInt(data[offset], data[offset + 1], data[offset + 2], data[offset + 3]);
+      
+        return { _r:data[offset],
+                 _g:data[offset + 1],
+                 _b:data[offset + 2],
+                 _a:data[offset + 3],
+                 asInt:intc,
+                 asString:p.color.toString(intc)}; 
       }
 
       // x,y is inside canvas space
       data = p.toImageData(0|x, 0|y, 1, 1).data;
-      return color$4(data[0],
-                     data[1],
-                     data[2],
-                     data[3]);
+      
+      intc = p.color.toInt(data[0], data[1], data[2], data[3]);
+      
+      return { _r:data[0],
+               _g:data[1],
+               _b:data[2],
+               _a:data[3],
+               asInt:intc,
+               asString:p.color.toString(intc)}; 
     }
     function get$3(x,y,img) {
       if (img.isRemote) { // Remote images cannot access imageData
@@ -15303,11 +15314,15 @@
       }
       // PImage.get(x,y) was called, return the color (int) at x,y of img
       var offset = y * img.width * 4 + (x * 4),
-          data = img.imageData.data;
-          return color$4(data[offset],
-                         data[offset + 1],
-                         data[offset + 2],
-                         data[offset + 3]);
+      data = img.imageData.data;
+      var intc = p.color.toInt(data[offset], data[offset + 1], data[offset + 2], data[offset + 3]);
+      
+      return { _r:data[offset],
+               _g:data[offset + 1],
+               _b:data[offset + 2],
+               _a:data[offset + 3],
+               asInt:intc,
+               asString:p.color.toString(intc)};
     }
     function get$4(x, y, w, h) {
       // return a PImage of w and h from cood x,y of curContext
