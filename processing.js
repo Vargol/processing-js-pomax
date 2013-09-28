@@ -14776,7 +14776,84 @@
             }
             aImg.__isDirty = true;
           };
+        }(pImage)),
+        
+        _getPixel: (function(aImg) {
+          return function(i) {
+            var offset = i*4,
+              data = aImg.imageData.data;
+
+            if (aImg.isRemote) {
+              throw "Image is loaded remotely. Cannot get pixels.";
+            }
+
+            return (data[offset+3] << 24) & PConstants.ALPHA_MASK |
+                   (data[offset] << 16) & PConstants.RED_MASK |
+                   (data[offset+1] << 8) & PConstants.GREEN_MASK |
+                   data[offset+2] & PConstants.BLUE_MASK;
+          };
+        }(pImage)),
+
+        _setPixel: (function(aImg) {
+          return function(i, c) {
+            var offset = i*4,
+              data = aImg.imageData.data;
+
+            if (aImg.isRemote) {
+              throw "Image is loaded remotely. Cannot set pixel.";
+            }
+
+            data[offset+0] = (c & PConstants.RED_MASK) >>> 16;
+            data[offset+1] = (c & PConstants.GREEN_MASK) >>> 8;
+            data[offset+2] = (c & PConstants.BLUE_MASK);
+            data[offset+3] = (c & PConstants.ALPHA_MASK) >>> 24;
+            aImg.__isDirty = true;
+          };
+        }(pImage)),
+
+        _toArray: (function(aImg) {
+          return function() {
+            var arr = [],
+              data = aImg.imageData.data,
+              length = aImg.width * aImg.height;
+
+            if (aImg.isRemote) {
+              throw "Image is loaded remotely. Cannot get pixels.";
+            }
+
+            for (var i = 0, offset = 0; i < length; i++, offset += 4) {
+              arr.push( (data[offset+3] << 24) & PConstants.ALPHA_MASK |
+                        (data[offset] << 16) & PConstants.RED_MASK |
+                        (data[offset+1] << 8) & PConstants.GREEN_MASK |
+                        data[offset+2] & PConstants.BLUE_MASK );
+            }
+            return arr;
+          };
+        }(pImage)),
+
+        _set: (function(aImg) {
+          return function(arr) {
+            var offset,
+              data,
+              c;
+            if (this.isRemote) {
+              throw "Image is loaded remotely. Cannot set pixels.";
+            }
+
+            data = aImg.imageData.data;
+            for (var i = 0, aL = arr.length; i < aL; i++) {
+              c = arr[i];
+              offset = i*4;
+
+              data[offset+0] = (c & PConstants.RED_MASK) >>> 16;
+              data[offset+1] = (c & PConstants.GREEN_MASK) >>> 8;
+              data[offset+2] = (c & PConstants.BLUE_MASK);
+              data[offset+3] = (c & PConstants.ALPHA_MASK) >>> 24;
+            }
+            aImg.__isDirty = true;
+          };
         }(pImage))
+        
 
       };
     }
@@ -15579,7 +15656,39 @@
         for (var i = 0, aL = arr.length; i < aL; i++) {
           this.setPixel(i, arr[i]);
         }
-      }
+      },
+      
+      _getPixel: function(i) {
+        var offset = i*4, data = p.imageData.data;
+        return (data[offset+3] << 24) & 0xff000000 |
+               (data[offset+0] << 16) & 0x00ff0000 |
+               (data[offset+1] << 8) & 0x0000ff00 |
+               data[offset+2] & 0x000000ff;
+      },
+      _setPixel: function(i,c) {
+        var offset = i*4, data = p.imageData.data;
+        data[offset+0] = (c & 0x00ff0000) >>> 16; // RED_MASK
+        data[offset+1] = (c & 0x0000ff00) >>> 8;  // GREEN_MASK
+        data[offset+2] = (c & 0x000000ff);        // BLUE_MASK
+        data[offset+3] = (c & 0xff000000) >>> 24; // ALPHA_MASK
+      },
+      _toArray: function() {
+        var arr = [], length = p.imageData.width * p.imageData.height, data = p.imageData.data;
+        for (var i = 0, offset = 0; i < length; i++, offset += 4) {
+          arr.push((data[offset+3] << 24) & 0xff000000 |
+                   (data[offset+0] << 16) & 0x00ff0000 |
+                   (data[offset+1] << 8) & 0x0000ff00 |
+                   data[offset+2] & 0x000000ff);
+        }
+        return arr;
+      },
+      _set: function(arr) {
+        for (var i = 0, aL = arr.length; i < aL; i++) {
+          this._setPixel(i, arr[i]);
+        }
+      }      
+      
+
     };
 
     // Gets a 1-Dimensional pixel array from Canvas
@@ -16157,7 +16266,7 @@
           currRowIdx = currIdx;
           maxRowIdx = currIdx + aImg.width;
           while (currIdx < maxRowIdx) {
-            colOrig = colOut = aImg.pixels.getPixel(currIdx);
+            colOrig = colOut = aImg.pixels._getPixel(currIdx);
             idxLeft = currIdx - 1;
             idxRight = currIdx + 1;
             idxUp = currIdx - aImg.width;
@@ -16174,10 +16283,10 @@
             if (idxDown >= maxIdx) {
               idxDown = currIdx;
             }
-            colUp = aImg.pixels.getPixel(idxUp).asInt;
-            colLeft = aImg.pixels.getPixel(idxLeft).asInt;
-            colDown = aImg.pixels.getPixel(idxDown).asInt;
-            colRight = aImg.pixels.getPixel(idxRight).asInt;
+            colUp = aImg.pixels._getPixel(idxUp);
+            colLeft = aImg.pixels._getPixel(idxLeft);
+            colDown = aImg.pixels._getPixel(idxDown);
+            colRight = aImg.pixels._getPixel(idxRight);
 
             // compute luminance
             currLum = 77*(colOrig>>16&0xff) + 151*(colOrig>>8&0xff) + 28*(colOrig&0xff);
@@ -16202,7 +16311,7 @@
               colOut = colDown;
               currLum = lumDown;
             }
-            out[currIdx++] = color$1(colOut);
+            out[currIdx++] = colOut;
           }
         }
       } else {
@@ -16211,7 +16320,7 @@
           currRowIdx = currIdx;
           maxRowIdx = currIdx + aImg.width;
           while (currIdx < maxRowIdx) {
-            colOrig = colOut = aImg.pixels.getPixel(currIdx);
+            colOrig = colOut = aImg.pixels._getPixel(currIdx);
             idxLeft = currIdx - 1;
             idxRight = currIdx + 1;
             idxUp = currIdx - aImg.width;
@@ -16228,10 +16337,10 @@
             if (idxDown >= maxIdx) {
               idxDown = currIdx;
             }
-            colUp = aImg.pixels.getPixel(idxUp).asInt;
-            colLeft = aImg.pixels.getPixel(idxLeft).asInt;
-            colDown = aImg.pixels.getPixel(idxDown).asInt;
-            colRight = aImg.pixels.getPixel(idxRight).asInt;
+            colUp = aImg.pixels._getPixel(idxUp);
+            colLeft = aImg.pixels._getPixel(idxLeft);
+            colDown = aImg.pixels._getPixel(idxDown);
+            colRight = aImg.pixels._getPixel(idxRight);
 
             // compute luminance
             currLum = 77*(colOrig>>16&0xff) + 151*(colOrig>>8&0xff) + 28*(colOrig&0xff);
@@ -16256,11 +16365,11 @@
               colOut = colDown;
               currLum = lumDown;
             }
-            out[currIdx++]=color$1(colOut);
+            out[currIdx++]=colOut;
           }
         }
       }
-      aImg.pixels.set(out);
+      aImg.pixels._set(out);
       //p.arraycopy(out,0,pixels,0,maxIdx);
     };
 
@@ -16311,22 +16420,21 @@
           if (img.format === PConstants.ALPHA) { //trouble
             // for an alpha image, convert it to an opaque grayscale
             for (i = 0; i < imglen; i++) {
-              col = 255 - img.pixels.getPixel(i);
-              img.pixels.setPixel(i,(0xff000000 | (col << 16) | (col << 8) | col));
+              col = 255 - img.pixels._getPixel(i);
+              img.pixels._setPixel(i,(0xff000000 | (col << 16) | (col << 8) | col));
             }
             img.format = PConstants.RGB; //trouble
           } else {
             for (i = 0; i < imglen; i++) {
               col = 255 - img.pixels.getPixel(i).asInt;
-              img.pixels.setPixel(i,color$1(0xff000000 | (col << 16) | (col << 8) | col))
-              img.pixels.setPixel(i,color$1((col & PConstants.ALPHA_MASK) | lum<<16 | lum<<8 | lum));
+              img.pixels._setPixel(i,(col & PConstants.ALPHA_MASK) | lum<<16 | lum<<8 | lum);
             }
           }
           break;
 
         case PConstants.INVERT:
           for (i = 0; i < imglen; i++) {
-            img.pixels.setPixel(i, color$1(img.pixels.getPixel(i).asInt ^ 0xffffff));
+            img.pixels._setPixel(i, (img.pixels._getPixel(i) ^ 0xffffff));
           }
           break;
 
@@ -16340,20 +16448,20 @@
           }
           var levels1 = levels - 1;
           for (i = 0; i < imglen; i++) {
-            var rlevel = img.pixels.getPixel(i)._r & 0xff;
-            var glevel = img.pixels.getPixel(i)._g & 0xff;
-            var blevel = img.pixels.getPixel(i)._b & 0xff;
+            var rlevel = (img.pixels._getPixel(i) >> 16) & 0xff;
+            var glevel = (img.pixels._getPixel(i) >> 8) & 0xff;
+            var blevel = img.pixels._getPixel(i) & 0xff;
             rlevel = (((rlevel * levels) >> 8) * 255) / levels1;
             glevel = (((glevel * levels) >> 8) * 255) / levels1;
             blevel = (((blevel * levels) >> 8) * 255) / levels1;
-            img.pixels.setPixel(i, color$4(rlevel,glevel,blevel, 255));
+            img.pixels._setPixel(i, ((0xff000000 & img.pixels._getPixel(i)) | (rlevel << 16) | (glevel << 8) | blevel));
           }
           break;
 
         case PConstants.OPAQUE:
           for (i = 0; i < imglen; i++) {
             var c = img.pixels.getPixel(i);
-            img.pixels.setPixel(i, color$4(c._r, c._g, c._b, 255));
+            img.pixels._setPixel(i, (img.pixels._getPixel(i) | 0xff000000));
           }
           img.format = PConstants.RGB; //trouble
           break;
@@ -16368,7 +16476,8 @@
           var thresh = p.floor(param * 255);
           for (i = 0; i < imglen; i++) {
             var max = p.max(img.pixels.getPixel(i)._r, p.max(img.pixels.getPixel(i)._g, img.pixels.getPixel(i)._b));
-            img.pixels.setPixel(i, color$1((img.pixels.getPixel(i).asInt & PConstants.ALPHA_MASK) | ((max < thresh) ? 0x000000 : 0xffffff)));
+            var max = p.max((img.pixels._getPixel(i) & PConstants.RED_MASK) >> 16, p.max((img.pixels._getPixel(i) & PConstants.GREEN_MASK) >> 8, (img.pixels._getPixel(i) & PConstants.BLUE_MASK)));
+            img.pixels._setPixel(i, ((img.pixels._getPixel(i) & PConstants.ALPHA_MASK) | ((max < thresh) ? 0x000000 : 0xffffff)));
           }
           break;
 
