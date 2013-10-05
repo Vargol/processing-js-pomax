@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Processing-js : A port of the Processing visualization language to JavaScript." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Processing-js</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/Vargol/processing-js-pomax">View on GitHub</a>
+
+          <h1 id="project_title">Processing-js</h1>
+          <h2 id="project_tagline">A port of the Processing visualization language to JavaScript.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/Vargol/processing-js-pomax/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/Vargol/processing-js-pomax/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to a Processing.js fork.</h3>
+
+<p>This fork sacrifices processing compatabilty at the alter of faster drawing.</p>
+<p>The change makes color variables opaque objects instead of an integer allowing the string conversion needed for using the colour on a html5 canvas
+to occur on color creation rather than color use. If you then reuse color variables rather than generate them on the fly you can get increases in the 
+speed of sketch by over 50% when the sketch spends most of its time drawing strokes, fills and points.</p>
+
+<p>What you lose is the ability to alter a color value using maths, if you need to do that store the number version.</p>
+
+<p>To prove such outrageous claims in improvement here's an example. Two sketches using the same pde file, one runinng processing.js 1.4.1 and
+one one runnig my fork.
+</p>
+<p><a href="original/index.html">processing.js 1.4.1</a></p>
+<p><a href="fork/index.html">The new fork</a></p>
+
+<p>The processing code is set to stop drawing at a fixed point and show how much work its done and how long it took, I get the follow results.</p>
+<pre>
+processing.js 4087: 67328
+my fork       4087: 32398
+</pre>
+<p>My maths works that out as running in <b>48.12%</b> of the time the original processing.js version ran it, or 51.88% faster or, in english, over twice as fast.</p>
+
+
+<p>Another nicer example is this version of Jared Tarbell's Substrate.
+</p>
+<p><a href="original/substrate.html">processing.js 1.4.1</a></p>
+<p><a href="fork/substrate.html">The new fork</a></p>
+
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Processing-js maintained by <a href="https://github.com/Vargol">Vargol</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
